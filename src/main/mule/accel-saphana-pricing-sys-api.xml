@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="accel-saphana-pricing-sys-api-main">
+        <http:listener config-ref="accel-saphana-pricing-sys-api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[attributes.&quot;x-correlation-id&quot; default correlationId]" doc:name="TransactionId" doc:id="220bad26-13cc-41f4-a35b-2bacb1863784" variableName="transactionId" />
+        <apikit:router config-ref="accel-saphana-pricing-sys-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Bad Request">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "400",
+  "errorMessage": "Bad request",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Not Found">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "404",
+  "errorMessage": "Resource not found",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Method Not Allowed">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "405",
+  "errorMessage": "Method not allowed",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Not Acceptable">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "406",
+  "errorMessage": "Not acceptable",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Unsupported Media Type">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "415",
+  "errorMessage": "Unsupported media type",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Not Implemented">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "501",
+  "errorMessage": "Not Implemented",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate enableNotifications="true" logException="true" doc:name="On_Error_Propagate_Internal_Server_Error" doc:id="dbf4d069-d837-476a-9913-713d468e7563" type="ANY">
+                <ee:transform doc:name="Generic Error Handler" doc:id="2bf3bb58-bcc5-470d-ac66-0d6c5e0f7583">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "500",
+  "errorMessage": "Internal Server Error",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="accel-saphana-pricing-sys-api-console">
+        <http:listener config-ref="accel-saphana-pricing-sys-api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="accel-saphana-pricing-sys-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Not Found" doc:id="1eeeea5a-1e02-4cfd-a7eb-d66ae1958ab5" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "404",
+  "errorMessage": "Resource not found",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="put:\pricing\(priceId):application\json:accel-saphana-pricing-sys-api-config">
+        <ee:transform doc:name="501 Not Implemented" doc:id="553cf86d-2e6a-4931-bd9b-f0b61410ed5f" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  errorCode: "501",
+  errorMessage: "This operation has not been implemented",
+  transactionId: correlationId,
+  timeStamp: now() as DateTime
+}]]></ee:set-payload>
+            </ee:message>
+            <ee:variables>
+                <ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+    <flow name="get:\ping:accel-saphana-pricing-sys-api-config">
+        <flow-ref doc:name="ping_get-health" doc:id="51d56909-9cfc-4b6f-b0da-8964f1bcc3e2" name="ping_get-health" />
+    </flow>
+    <flow name="get:\pricing:accel-saphana-pricing-sys-api-config">
+        <flow-ref doc:name="implementation_getSalesPricingConditionList" doc:id="2647c2ad-5164-4442-9e51-afa3e041a505" name="implementation_getSalesPricingConditionList" />
+    </flow>
+    <flow name="get:\pricing\(priceId):accel-saphana-pricing-sys-api-config">
+        <flow-ref doc:name="implementation_getSalesPricingConditionById" doc:id="302350ba-c329-4474-9a94-ec591eb4f0e6" name="implementation_getSalesPricingConditionById" />
+    </flow>
+    <flow name="post:\pricing:application\json:accel-saphana-pricing-sys-api-config">
+        <flow-ref doc:name="implementation_createSalesPricingCondition" doc:id="d227345a-ac24-4d65-aa04-d65a488e17b5" name="implementation_createSalesPricingCondition" />
+    </flow>
+    <flow name="put:\prices\(priceId):application\json:accel-saphana-pricing-sys-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="priceId">attributes.uriParams.'priceId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  severity: "ERROR",
+  code: "SYSGEN5000",
+  message: "The system failed to process the request",
+  parameters: [
+    {
+      paramName: "ResourceName",
+      paramValue: "/accounts"
+    }, 
+    {
+      paramName: "ObjectId",
+      paramValue: "00582245"
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\prices\(priceId):accel-saphana-pricing-sys-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="priceId">attributes.uriParams.'priceId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: null,
+  maxRequiredOrderValue: null,
+  unitListPrice: -72907219
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\prices:accel-saphana-pricing-sys-api-config">
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  errorCode: "400",
+  errorMessage: "Invalid request message",
+  transactionId: "dd960082-abbf-47c2-8c65-f18eeb35848b",
+  timeStamp: "2019-09-30T15:27:49.274Z"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\prices:application\json:accel-saphana-pricing-sys-api-config">
+        <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  responseStatus: "SUCCESS"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\prices\salesPrice:application\json:accel-saphana-pricing-sys-api-config">
+		<flow-ref doc:name="implementation_getSalesPrice" doc:id="0ae3117b-84c6-434e-9231-ccb1343dfad2" name="implementation_getSalesPrice"/>
+    </flow>
+</mule>

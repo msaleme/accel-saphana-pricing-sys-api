@@ -1,0 +1,159 @@
+{
+	"info": {
+		"_postman_id": "54e698bf-da10-4d52-8ed3-818da46bdd4a",
+		"name": "accel-saphana-pricing-sys-api",
+		"description": "accel-saphana-pricing-sys-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Release 1.0",
+			"item": [
+				{
+					"name": "Get By Price Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://accel-saphana-pricing-sys-api-dev.ca-c1.cloudhub.io:443/api/pricing/:priceId",
+							"protocol": "https",
+							"host": [
+								"accel-saphana-pricing-sys-api-dev",
+								"ca-c1",
+								"cloudhub",
+								"io"
+							],
+							"port": "443",
+							"path": [
+								"api",
+								"pricing",
+								":priceId"
+							],
+							"variable": [
+								{
+									"key": "priceId",
+									"value": "0000007214"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Query Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{sapHost}}/api/ping",
+							"protocol": "https",
+							"host": [
+								"{{sapHost}}"
+							],
+							"path": [
+								"api",
+								"ping"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Pricing",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{sapHost}}/api/pricing?offset=1",
+					"protocol": "https",
+					"host": [
+						"{{sapHost}}"
+					],
+					"path": [
+						"api",
+						"pricing"
+					],
+					"query": [
+						{
+							"key": "offset",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "sapHost",
+			"value": "accel-saphana-pricing-sys-api-dev.ca-c1.cloudhub.io"
+		}
+	]
+}

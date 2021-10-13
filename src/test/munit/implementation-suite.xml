@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-suite.xml" />
+	<munit:test name="implementation-put:\products\(productId):application\json:accel-saphana-products-sys-api-config" doc:id="8b543fd0-8cd2-4e11-b9d8-4fa102a9aeb5" >
+		<munit:execution >
+			<flow-ref doc:name="put:\pricing\(priceId):application\json:accel-saphana-pricing-sys-api-config" doc:id="20ea28fe-363b-4279-b7be-837e10510fbf" name="put:\pricing\(priceId):application\json:accel-saphana-pricing-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert payload" doc:id="bd4f6d6e-ab64-4990-93d1-1305c37a4723" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ping_get-health-test" doc:id="7bb9ec1c-7c7b-4893-a66e-f7e65a145bcc" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="0102880f-b13b-4a1b-8c72-b9051f68fddd" >
+				<munit:payload value="#[readUrl('classpath://pinggethealthtest\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://pinggethealthtest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://pinggethealthtest\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId" value="#[readUrl('classpath://pinggethealthtest\set-event_variable_1.dwl')]" encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="ping_get-health" doc:id="9d126bc5-3ba9-4e50-b975-b88b04a8c481" name="ping_get-health"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="61a73785-8264-497d-9923-49aa621bfa33" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import pinggethealthtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation_getPricingList-test"
+		doc:id="474b113a-4d7a-4c9b-bcb7-2f351d802a9d">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock Query Product"
+				doc:id="2487a461-875d-4683-8394-224687baa8fd"
+				processor="s4hana:query">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="ead26c16-ce52-4b2a-97fd-0bffb5680060"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://implementationgetPricingListtest\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetPricingListtest\mock_variable_.dwl')]" />
+						<munit-tools:variable key="transactionId" value="#[readUrl('classpath://implementationgetPricingListtest\mock_variable_1.dwl')]" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input"
+				doc:id="53e303a8-3131-476e-8800-39db75f85d6b">
+				<munit:payload
+					value="#[readUrl('classpath://implementationgetPricingListtest\set-event_payload.dwl')]"
+					encoding="UTF-8" />
+				<munit:attributes
+					value="#[readUrl('classpath://implementationgetPricingListtest\set-event_attributes.dwl')]" />
+				<munit:variables>
+					<munit:variable key="outboundHeaders"
+						value="#[readUrl('classpath://implementationgetPricingListtest\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId"
+						value="#[readUrl('classpath://implementationgetPricingListtest\set-event_variable_1.dwl')]"
+						encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref
+				doc:name="get:\pricing:accel-saphana-pricing-sys-api-config"
+				doc:id="bb98972f-6432-474f-9a7f-15800b3513a7"
+				name="get:\pricing:accel-saphana-pricing-sys-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="d7478d75-3ec5-441f-af20-59f46be2f637" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation_getPricingById-test"
+		doc:id="2c65e140-7335-44cb-9e8e-fd2a451dea05">
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock Get product by Id"
+				doc:id="9626e823-28b1-4728-a372-cae6c96b6cdb"
+				processor="s4hana:get-entity">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute
+						whereValue="53cf3f97-eff8-4c71-9227-e37f48523577"
+						attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[output application/java --- readUrl('classpath://implementationgetPricingByIdtest\mock_payload.dwl')]"
+						mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:attributes
+						value="#[output application/java --- readUrl('classpath://implementationgetPricingByIdtest\mock_attributes.dwl')]"
+						mediaType="application/java" />
+					<munit-tools:variables>
+						<munit-tools:variable key="outboundHeaders"
+							value="#[readUrl('classpath://implementationgetPricingByIdtest\mock_variable_.dwl')]" />
+						<munit-tools:variable key="transactionId"
+							value="#[readUrl('classpath://implementationgetPricingByIdtest\mock_variable_1.dwl')]"
+							encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input"
+				doc:id="a8ad5719-fd43-404d-9533-9fb2eb5356fd">
+				<munit:payload
+					value="#[readUrl('classpath://implementationgetPricingByIdtest\set-event_payload.dwl')]"
+					encoding="UTF-8" />
+				<munit:attributes
+					value="#[readUrl('classpath://implementationgetPricingByIdtest\set-event_attributes.dwl')]" />
+				<munit:variables>
+					<munit:variable key="outboundHeaders"
+						value="#[readUrl('classpath://implementationgetPricingByIdtest\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId"
+						value="#[readUrl('classpath://implementationgetPricingByIdtest\set-event_variable_1.dwl')]"
+						encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref
+				doc:name="get:\pricing\(priceId):accel-saphana-pricing-sys-api-config"
+				doc:id="ababc1a5-01f2-45b3-b5f0-8dc0a912b251"
+				name="get:\pricing\(priceId):accel-saphana-pricing-sys-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="2f178c8f-d34b-4c70-9fd2-c9ab2590bdbd" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation_getPricingById-test-not-found" doc:id="32f573a5-fedc-4e8b-b13c-2b9698b8bd1d" expectedErrorType="S4HANA:INVALID_KEY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Query by Id Product Data" doc:id="a75e4adb-5dfe-4ec4-8851-bb053dd92f94" processor="s4hana:get-entity">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Get product by Id" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="53cf3f97-eff8-4c71-9227-e37f485235777" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="SAP_S_4HANA_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://implementationgetPricingByIdtestnotfound\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\mock_variable_.dwl')]" />
+						<munit-tools:variable key="productId" value="#[output application/java --- readUrl('classpath://implementationgetPricingByIdtestnotfound\mock_variable_1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="transactionId" value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\mock_variable_2.dwl')]" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="3b4d5002-1188-468a-945a-68d107f0bf21" >
+				<munit:payload value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\set-event_payload.dwl')]" encoding="UTF-8" />
+				<munit:attributes value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId" value="#[readUrl('classpath://implementationgetPricingByIdtestnotfound\set-event_variable_1.dwl')]" encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\pricing\(priceId):accel-saphana-pricing-sys-api-config" doc:id="4d2c918a-b151-4f2f-ba3d-868d8e9f3f0f" name="get:\pricing\(priceId):accel-saphana-pricing-sys-api-config"/>
+		</munit:execution>
+		<!--  <munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="9a33d05f-0ebe-4a15-bbca-a30f19331fd7" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetPricingByIdtestnotfound::assert_expression_payload
+-&#45;&#45;
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>-->
+	</munit:test>
+	<flow name="mock-s4hana:create-entity" doc:id="0d638b28-9bc1-4cab-b7f5-df8eb14db48e" >
+		<try doc:name="Try" doc:id="0c796f18-2f78-448a-81a2-6f5fa727b313" >
+			<munit-tools:retrieve doc:name="Retrieve" doc:id="6a82f4be-2ab5-4597-907d-9076f0a29ab5" key="Mock Create SalesPrice entity"/>
+			<error-handler >
+				<on-error-continue enableNotifications="false" logException="false" doc:name="On Error Continue" doc:id="f5fa79fc-fc7e-41be-b0cc-296ab155964f" type="ANY">
+					<set-payload value="#[1]" doc:name="Set Payload" doc:id="f5680064-5df8-4197-9636-2fb16946e63c" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+		<munit-tools:store doc:name="Store" doc:id="f46a0805-f339-478b-bee6-8cecffe39865" key="Mock Create SalesPrice entity">
+			<munit-tools:value ><![CDATA[#[payload + 1]]]></munit-tools:value>
+		</munit-tools:store>
+		<choice doc:name="Choice" doc:id="fd0f7fed-02f4-46fa-9aac-355dd5ca2eb6" >
+			<when expression="#[payload == 1]">
+				<munit:set-event doc:name="Set Event" doc:id="f8a0385e-e4c6-4d58-bc4f-b1ab4a5a1ce5" >
+					<munit:payload value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest\mock_payload.dwl')]" encoding="UTF-8" mediaType="application/java" />
+					<munit:attributes value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest\mock_attributes.dwl')]" mediaType="application/java" />
+					<munit:variables >
+						<munit:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetSalesPricetest\mock_variable_.dwl')]" />
+						<munit:variable key="createSalesPriceRequest" value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest\mock_variable_1.dwl')]" encoding="UTF-8" mediaType="application/json" />
+						<munit:variable key="transactionId" value="#[readUrl('classpath://implementationgetSalesPricetest\mock_variable_2.dwl')]" encoding="UTF-8" />
+					</munit:variables>
+				</munit:set-event>
+			</when>
+			<when expression="#[payload == 2]">
+				<munit:set-event doc:name="Set Event" doc:id="d8b24d51-cdf4-4af2-ad64-1e03edc94afd" >
+					<munit:payload value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest\mock_payload1.dwl')]" encoding="UTF-8" mediaType="application/java" />
+					<munit:attributes value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest\mock_attributes1.dwl')]" mediaType="application/java" />
+					<munit:variables >
+						<munit:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetSalesPricetest\mock_variable_3.dwl')]" />
+						<munit:variable key="createSalesPriceRequest" value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest\mock_variable_4.dwl')]" encoding="UTF-8" mediaType="application/json" />
+						<munit:variable key="transactionId" value="#[readUrl('classpath://implementationgetSalesPricetest\mock_variable_5.dwl')]" encoding="UTF-8" />
+					</munit:variables>
+				</munit:set-event>
+			</when>
+			<otherwise >
+				<munit-tools:fail doc:name="Fail" doc:id="252709c6-2f79-4b3c-8d9b-c5fa39102e80" message="There are no more events to mock"/>
+			</otherwise>
+		</choice>
+	</flow>
+	<munit:test name="implementation_getSalesPrice-test" doc:id="aefaf537-171b-42c7-9003-d2e84b5409a8" ignore="true">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Create SalesPrice entity" doc:id="8f63b997-7651-442c-a71c-5f030c3329ee" processor="s4hana:create-entity">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="49dbb8d9-de20-4e9b-9fa7-3009b1a420bb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-call flow="mock-s4hana:create-entity" />
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Consolidate responses" doc:id="2ac33eb1-79a5-4f61-a5ce-8255d95bc311" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f13326f9-789c-4870-b1c8-4c8f87b6cc52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="489066db-bf60-45d2-9a01-43519f64ad25" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest::spy_assert_payload
+---
+spy_assert_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="923ce81b-d59c-4b5d-be84-6362f9c7aab2" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest::spy_assert_payload1
+---
+spy_assert_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Create response for HANA Sales Price call" doc:id="77952e97-98e6-497a-bc89-b535bc2f705b" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d5552f34-bd9c-4442-a2d5-03e1e3baf4e4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:queue doc:name="Store actual value" doc:id="6b694c63-045c-4097-a8b9-5d8be4617ea1" queueName="Before Create response for HANA Sales Price call">
+						<munit-tools:value ><![CDATA[#[{
+  "message": message,
+  "variables": vars
+}]]]></munit-tools:value>
+					</munit-tools:queue>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:queue doc:name="Store actual value" doc:id="452a8046-3d13-4e3b-a1b1-569bb8b98c8c" queueName="After Create response for HANA Sales Price call">
+						<munit-tools:value ><![CDATA[#[{
+  "message": message,
+  "variables": vars
+}]]]></munit-tools:value>
+					</munit-tools:queue>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="dd62cfa2-2232-4846-9cb1-d10b7c394cc1" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://implementationgetSalesPricetest\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetSalesPricetest\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId" value="#[readUrl('classpath://implementationgetSalesPricetest\set-event_variable_1.dwl')]" encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation_getSalesPrice" doc:id="9e7b93f1-a9c2-42db-a714-7991b5624974" name="implementation_getSalesPrice"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="25bd1051-5f7d-4426-9df5-20f37f7b0304" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Create request for HANA Sales Price call" doc:id="264b75ce-d202-4ad8-8b9f-5c85916da845" processor="ee:transform" times="2">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cefd6b1a-0c53-4fc4-a142-4846755977b0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Consolidate responses" doc:id="82939edb-7c13-4df6-bd53-1eef25c510bb" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f13326f9-789c-4870-b1c8-4c8f87b6cc52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-equals doc:name="Assert queues' sizes" doc:id="782eec90-5929-4899-90a3-12457170d4bd" actual="#[[&#10;  MunitTools::queueSize('Before Create response for HANA Sales Price call'),&#10;  MunitTools::queueSize('After Create response for HANA Sales Price call')&#10;]]" expected="#[[&#10;  2,&#10;  2&#10;]]" message="The queues' sizes do not match"/>
+			<foreach doc:name="Assert before" doc:id="6c1aaf40-e286-4718-9932-873adfe6d944" collection="#[readUrl('classpath://implementationgetSalesPricetest\spy_assert_before_collection.dwl')]">
+				<munit-tools:dequeue doc:name="Retrieve actual value" doc:id="93bc73be-b68f-42b5-95f3-19bd9809ee83" queueName="Before Create response for HANA Sales Price call" target="actual"/>
+				<munit-tools:assert doc:name="Assert payload" doc:id="2621e95f-ae94-44db-a111-c65b1727ca2f" message="The payload does not match">
+					<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest::spy_assert_payload2
+---
+spy_assert_payload2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+				</munit-tools:assert>
+			</foreach>
+			<foreach doc:name="Assert after" doc:id="c3cc0721-b8b0-4bb5-8c3f-8bbe66b5058c" collection="#[readUrl('classpath://implementationgetSalesPricetest\spy_assert_after_collection.dwl')]">
+				<munit-tools:dequeue doc:name="Retrieve actual value" doc:id="4e6c6735-cbf3-46a5-b691-5f6f52d1afdf" queueName="After Create response for HANA Sales Price call" target="actual"/>
+				<munit-tools:assert doc:name="Assert payload" doc:id="b1cc3d0e-ae79-4a79-a5a1-aac9e2363a58" message="The payload does not match">
+					<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest::spy_assert_payload3
+---
+spy_assert_payload3::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+				</munit-tools:assert>
+			</foreach>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation_getSalesPrice-test1" doc:id="e3cab329-f105-4580-8c8a-16b0473b5e73" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Create SalesPrice Discount validation entity" doc:id="603feec9-8615-431a-ba4f-f13af98e793c" processor="s4hana:create-entity">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="49dbb8d9-de20-4e9b-9fa7-3009b1a420bb" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest1\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:attributes value="#[output application/java --- readUrl('classpath://implementationgetSalesPricetest1\mock_attributes.dwl')]" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetSalesPricetest1\mock_variable_.dwl')]" />
+						<munit-tools:variable key="unitPriceReq" value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest1\mock_variable_1.dwl')]" mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="discountValidationReq" value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest1\mock_variable_2.dwl')]" mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="createSalesPriceRequest" value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest1\mock_variable_3.dwl')]" mediaType="application/json" encoding="UTF-8" />
+						<munit-tools:variable key="transactionId" value="#[readUrl('classpath://implementationgetSalesPricetest1\mock_variable_4.dwl')]" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Create request for HANA Sales Price Discount call" doc:id="e16c4dad-001b-42f1-bda6-a0bf84e55064" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cefd6b1a-0c53-4fc4-a142-4846755977b0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="9cce5590-2407-4a53-bb7e-8e8aa30ae9ec" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload
+---
+spy_assert_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert variables" doc:id="8eb3b8ae-2dc6-4000-9b90-1314b77b5482" message="The variables do not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_variables
+---
+spy_assert_variables::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Consolidate responses" doc:id="ac772a30-5259-4cd0-9771-e6750cfd4652" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f13326f9-789c-4870-b1c8-4c8f87b6cc52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="6f49bb4d-bdae-41a5-81fa-3a24bd04199d" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload1
+---
+spy_assert_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="334892c1-8bc5-4c49-8347-7e043df9197c" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload2
+---
+spy_assert_payload2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Create request for HANA Sales Price Unit price call" doc:id="31ed647c-a606-4d72-9b15-a7570e536613" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="65b89958-4193-49de-9350-3051e190aa0b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="074279e0-7829-41d1-b737-7472e6fc9346" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload3
+---
+spy_assert_payload3::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert variables" doc:id="68aa9b62-115e-4512-bd6c-f8c0aae5ddaf" message="The variables do not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_variables1
+---
+spy_assert_variables1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Create response for HANA Sales Price call" doc:id="2e518bd0-f7fb-475b-8ca1-6d605b520f3c" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d5552f34-bd9c-4442-a2d5-03e1e3baf4e4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="4d9114be-3b6a-430d-9dae-b24ca33d4595" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload4
+---
+spy_assert_payload4::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+					<munit-tools:assert doc:name="Assert attributes" doc:id="e578104f-da5a-46f4-a380-5026ce8b4043" message="The attributes do not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_attributes
+---
+spy_assert_attributes::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+					<munit-tools:assert doc:name="Assert variables" doc:id="43f86c36-615a-4aff-95d5-51b5f62a5461" message="The variables do not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_variables2
+---
+spy_assert_variables2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="8df793fb-c4e3-4e4e-a30e-56220a67dfc2" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::spy_assert_payload5
+---
+spy_assert_payload5::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="f6cbddb6-927a-406d-b995-5b9492478890" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://implementationgetSalesPricetest1\set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://implementationgetSalesPricetest1\set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://implementationgetSalesPricetest1\set-event_variable_.dwl')]" />
+					<munit:variable key="transactionId" value="#[readUrl('classpath://implementationgetSalesPricetest1\set-event_variable_1.dwl')]" encoding="UTF-8" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation_getSalesPrice" doc:id="56d5676e-9c7f-45c1-a7b9-df018aef069e" name="implementation_getSalesPrice"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="bb496d4d-16b9-4ccc-ab52-811fdc36fa94" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import implementationgetSalesPricetest1::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Create request for HANA Sales Price Discount call" doc:id="b94db2a4-7b51-4f2c-b3c2-ca3e41bfb4e1" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cefd6b1a-0c53-4fc4-a142-4846755977b0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Consolidate responses" doc:id="ae6edd9e-14a5-44b9-9fd8-c5d10771beaa" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f13326f9-789c-4870-b1c8-4c8f87b6cc52" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Create request for HANA Sales Price Unit price call" doc:id="c760fada-8681-4324-af83-5451aeaed40c" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="65b89958-4193-49de-9350-3051e190aa0b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Create response for HANA Sales Price call" doc:id="4300a90e-251f-4e36-9fec-5cf6d330a157" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="d5552f34-bd9c-4442-a2d5-03e1e3baf4e4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+</mule>

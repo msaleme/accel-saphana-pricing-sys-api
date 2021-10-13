@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="pricebookentry_response" format="json">
+      <types:shape format="json-schema" location="api/exchange_modules/997d5e99-287f-4f68-bc95-ed435d7c5797/accelerator-cim-library/1.0.0/jsonSchemas/PriceBookEntry.json"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#18d93ed2-f649-4ae7-8aea-e92b6f3e63c5">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="pricebookentry_response[]"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c938fe47-4bee-478b-a052-7cb1ace0406a">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="pricebookentry_response"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

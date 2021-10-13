@@ -1,0 +1,50 @@
+# API specification
+api:
+  name: "${project.artifactId}"
+  version: "${project.version}"
+  #Replace with respective autodiscovery id
+  autodiscoveryID: ""
+  
+accelerator:
+  logger: "com.mulesoft.accelerator.sap"
+
+https:
+  host: "0.0.0.0"
+  port: "8082"
+  
+until:
+  successful:
+    maxretries: "3"
+    timebetween: "3000"
+  
+sap:
+  hana:
+    url: "https://my304163.s4hana.ondemand.com"
+    username: "username overridden at deploy time"
+    password: "Password overridden at deploy time"
+    checkingRule: "A"
+    supplyingPlant: "1710"
+    DetermineAvailabilityAt:
+      service: "API_PRODUCT_AVAILY_INFO_BASIC"
+      entityType: "DetermineAvailabilityAt"
+    DetermineAvailabilityOf:
+      service: "API_PRODUCT_AVAILY_INFO_BASIC"
+      entityType: "DetermineAvailabilityOf"
+    createSlsPrcgCndn:
+      service: "API_SLSPRICINGCONDITIONRECORD_SRV"
+      entityType: "A_SlsPrcgConditionRecord"
+    Discountvalidation:
+      service: "API_SALES_ORDER_SIMULATION_SRV"
+      entityType: "A_SalesOrderSimulation" 
+    
+    
+reconnection:
+  frequency: "3000"
+  attempts: "3"
+  
+paginagtion:
+  offset: "10"
+  limit: "10" 
+  
+  
+  

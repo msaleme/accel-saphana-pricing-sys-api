@@ -1,0 +1,53 @@
+# API specification
+api:
+  name: "${project.artifactId}"
+  version: "${project.version}"
+  #Replace with respective autodiscovery id
+  autodiscoveryID: ""
+  
+accelerator:
+  logger: "com.mulesoft.accelerator.sap"
+
+http:
+  host: "0.0.0.0"
+  port: "8081"
+  
+https:
+  host: "0.0.0.0"
+  port: "8082"    
+  
+  
+until:
+  successful:
+    maxretries: "3"
+    timebetween: "3000"
+  
+sap:
+  hana:
+    url: ""
+    user: ""
+    password: "Password overridden at deploy time"
+    getSlsPrcgCndnList:
+      service: "API_SLSPRICINGCONDITIONRECORD_SRV"
+      entityType: "A_SlsPrcgConditionRecord"
+    getSlsPrcgCndnById:
+      service: "API_SLSPRICINGCONDITIONRECORD_SRV"
+      entityType: "A_SlsPrcgConditionRecord"
+    createSlsPrcgCndn:
+      service: "API_SLSPRICINGCONDITIONRECORD_SRV"
+      entityType: "A_SlsPrcgConditionRecord"
+    Discountvalidation:
+      service: "API_SALES_ORDER_SIMULATION_SRV"
+      entityType: "A_SalesOrderSimulation" 
+    
+            
+reconnection:
+  frequency: "3000"
+  attempts: "3"
+  
+paginagtion:
+  offset: "10"
+  limit: "10"  
+  
+
+  

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:s4hana="http://www.mulesoft.org/schema/mule/s4hana"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/s4hana http://www.mulesoft.org/schema/mule/s4hana/current/mule-s4hana.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="implementation_getSalesPricingConditionList"
+		doc:id="fbcda771-c54a-478f-9cd5-bc1a04a2eca0">
+		<logger level="INFO" doc:name="Start of transaction"
+			doc:id="33cb4850-c367-41ed-aa5d-f7ce778e4cda"
+			message="Start of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+		<try doc:name="Try - Query Pricing"
+			doc:id="6ca3b0a4-16c9-48b0-911d-61476cff154e">
+			<s4hana:query doc:name="Query Pricing"
+				doc:id="ead26c16-ce52-4b2a-97fd-0bffb5680060"
+				config-ref="SAP_S_4HANA_Config"
+				service='#[Mule::p("sap.hana.getSlsPrcgCndnList.service")]'
+				entityType='#[Mule::p("sap.hana.getSlsPrcgCndnList.entityType")]'
+				select="*,to_SlsPrcgCndnRecdSuplmnt,to_SlsPrcgCndnRecdValidity,to_SlsPrcgCndnRecordScale"
+				expand="to_SlsPrcgCndnRecdSuplmnt,to_SlsPrcgCndnRecdValidity,to_SlsPrcgCndnRecordScale"
+				pageSize='#[attributes.queryParams.offset default Mule::p("paginagtion.offset")]'
+				top='#[attributes.queryParams.limit default Mule::p("paginagtion.limit")]'
+				responseTimeoutUnit="SECONDS" orderBy="ConditionRecord"/>
+			<error-handler>
+				<on-error-propagate enableNotifications="true"
+					logException="true"
+					doc:name="On Error Propagate - Query Pricing Condition Failed"
+					doc:id="3ece838c-4872-4354-af8b-9021ef454536">
+					<logger level="ERROR" doc:name="Query pricing failed"
+						doc:id="a209e8e5-2ed2-4c25-ae39-145a8bd68bb5"
+						message="Query pricing failed" category="${accelerator.logger}" />
+					<ee:transform doc:name="500 Internal Server Error"
+						doc:id="e18d91c7-be33-4645-aee9-c958170e2ddc">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "500",
+  "errorMessage": "There was an internal server error " ++ (error.description default ""),
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="DEBUG" doc:name="Debug Log Payload"
+			doc:id="7acf1f18-b87c-424e-b958-1f6430f6995e"
+			category="${accelerator.logger}"
+			message="#[output application/json indent=false --- payload]" />
+		<ee:transform doc:name="Transform to Response"
+			doc:id="18d93ed2-f649-4ae7-8aea-e92b6f3e63c5">
+			<ee:message>
+				<ee:set-payload
+					resource="dwl/getPricingListResponse.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of transaction"
+			doc:id="6e8c3446-a955-43d6-b7af-8b4a847d3228"
+			message="End of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+	</sub-flow>
+	<sub-flow name="implementation_getSalesPricingConditionById"
+		doc:id="1d196359-e117-46d5-a4ef-daf5d6062f94">
+		<logger level="INFO" doc:name="Start of transaction"
+			doc:id="45bc3036-c213-473b-b83e-f88a90fd1749"
+			message="Start of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+		<ee:transform doc:name="Create Data for HANA Call"
+			doc:id="e5d61430-8afa-492f-9202-6801d6937a01">
+			<ee:message>
+				<ee:set-payload
+					resource="dwl/getPricingByIdRequest.dwl" />
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try - Query Pricing"
+			doc:id="b74b5304-3564-4c09-8567-42bd24f03979">
+			<s4hana:get-entity doc:name="Get Pricing by Id"
+				doc:id="53cf3f97-eff8-4c71-9227-e37f48523577"
+				config-ref="SAP_S_4HANA_Config"
+				service='#[Mule::p("sap.hana.getSlsPrcgCndnById.service")]'
+				entityType='#[Mule::p("sap.hana.getSlsPrcgCndnById.entityType")]'
+				select="*,to_SlsPrcgCndnRecdSuplmnt,to_SlsPrcgCndnRecdValidity,to_SlsPrcgCndnRecordScale"
+				expand="to_SlsPrcgCndnRecdSuplmnt,to_SlsPrcgCndnRecdValidity,to_SlsPrcgCndnRecordScale" />
+			<error-handler>
+				<on-error-propagate enableNotifications="true"
+					logException="true"
+					doc:name="On Error Propagate - Pricing Condition Not Found"
+					doc:id="efc1ca03-c156-479f-aa4a-27fe3e200743"
+					type="S4HANA:INVALID_KEY, S4HANA:NO_SUCH_ENTITY_KEY">
+					<ee:transform doc:name="pricing Not Found Response"
+						doc:id="11e9a073-eba5-4fe1-889b-6c82b4534841">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "404",
+  "errorMessage": "pricing not found",
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+				<on-error-propagate enableNotifications="true"
+					logException="true"
+					doc:name="On Error Propagate - Query Pricing Condition Failed"
+					doc:id="52da5b32-8320-4ade-a6fe-c8d9005de025">
+					<logger level="ERROR" doc:name="Query pricing failed"
+						doc:id="67cc15c7-1c84-4d65-a424-667ea2756ec5"
+						message="Query pricing failed" category="${accelerator.logger}" />
+					<ee:transform doc:name="500 Internal Server Error"
+						doc:id="3ff93a61-6825-4e93-9b2b-21d6939f2635">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "500",
+  "errorMessage": "There was an internal server error " ++ (error.description default ""),
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="DEBUG" doc:name="Debug Log Payload"
+			doc:id="144f79a0-d7a4-4267-8627-67ccc194ea66"
+			message="#[output application/json indent=false --- payload]"
+			category="${accelerator.logger}" />
+		<ee:transform doc:name="Transform to Response"
+			doc:id="c938fe47-4bee-478b-a052-7cb1ace0406a">
+			<ee:message>
+				<ee:set-payload
+					resource="dwl/getPricingByIdResponse.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of transaction"
+			doc:id="d1ff0cfd-cf08-45e2-9c44-25af9fbd3c3b"
+			message="End of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+	</sub-flow>
+	<sub-flow name="implementation_createSalesPricingCondition"
+		doc:id="dff48785-dfb3-47ef-80f6-95b135b1bcf7">
+		<logger level="INFO" doc:name="Start of transaction"
+			doc:id="06cf89d1-15ef-474f-bfa4-433f81f08dac"
+			message="Start of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+		<ee:transform doc:name="Create Data for HANA Call"
+			doc:id="ae62f0ad-4118-4e3f-9cc2-689eb63e73ab">
+			<ee:message>
+				<ee:set-payload
+					resource="dwl/createPricingsRequest.dwl" />
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try - Upsert Pricing"
+			doc:id="5f140667-e11e-4f93-acbd-841d85e6f76e">
+			<s4hana:create-entity doc:name="Create Pricings"
+				doc:id="a9bfb4a6-30d2-4615-8ca7-d7e572902db2"
+				config-ref="SAP_S_4HANA_Config"
+				service='#[Mule::p("sap.hana.createSlsPrcgCndn.service")]'
+				entityType='#[Mule::p("sap.hana.createSlsPrcgCndn.entityType")]' />
+			<error-handler>
+				<on-error-propagate enableNotifications="true"
+					logException="true"
+					doc:name="On Error Propagate - Upsert Pricing Condition Failed"
+					doc:id="78830ff9-5390-43c5-8c94-ab82b5575972">
+					<logger level="ERROR" doc:name="Upsert pricing failed"
+						doc:id="b9f6f3df-cbff-475a-998b-9b560bb8aaed"
+						message="Upsert pricing failed" category="${accelerator.logger}" />
+					<ee:transform doc:name="500 Internal Server Error"
+						doc:id="3431015e-d37b-45bd-a685-8edd0e574307">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  "errorCode": "500",
+  "errorMessage": "There was an internal server error " ++ (error.description default ""),
+  "transactionId": vars.transactionId,
+  "timeStamp": now() as DateTime
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables>
+							<ee:set-variable variableName="httpStatus"><![CDATA[500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="DEBUG" doc:name="Debug Log Payload"
+			doc:id="2e64294b-dd98-42f8-b826-31229558a25d"
+			message="#[output application/json indent=false --- payload]"
+			category="${accelerator.logger}" />
+		<ee:transform doc:name="Transform to Response"
+			doc:id="8be0ed3a-bbc9-4036-90f4-da4a2321db85">
+			<ee:message>
+				<ee:set-payload
+					resource="dwl/createPricingsResponse.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of transaction"
+			doc:id="ae34f258-fb47-4d75-9498-9a3066965dd2"
+			message="End of transaction for transaction-id #[vars.transactionId]"
+			category="${accelerator.logger}" />
+	</sub-flow>
+	<flow name="implementation_getSalesPrice" doc:id="b74d8b90-dfe9-40eb-a601-3eec2275b9cc" >
+		<logger level="INFO" doc:name="Start of transaction" doc:id="50d6f05d-2b94-412e-be3e-d66cb8b11633" message="Start of transaction for transaction-id #[vars.transactionId]" category="${accelerator.logger}" />
+		<logger level="DEBUG" doc:name="Debug Log Payload" doc:id="ff301047-edf7-478a-88de-7185849ed78f" message="#[output application/json indent=false --- payload]" category="${accelerator.logger}" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="1898ce26-2da8-4e36-8380-8b37c27a40da" >
+			<ee:transform doc:name="Create request for HANA Sales Price Unit price call" doc:id="65b89958-4193-49de-9350-3051e190aa0b" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable resource="dwl\createSalesPriceUnitPriceRequest.dwl" variableName="unitPriceReq" />
+				</ee:variables>
+			</ee:transform>
+			<ee:transform doc:name="Create request for HANA Sales Price Discount call" doc:id="cefd6b1a-0c53-4fc4-a142-4846755977b0">
+			<ee:message>
+			</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="createSalesPriceRequest" ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-variable>
+					<ee:set-variable resource="dwl\createSalesPriceDiscountRequest.dwl" variableName="discountValidationReq" />
+				</ee:variables>
+		</ee:transform>
+			<try doc:name="Try" doc:id="93af5cc7-8f5c-43b1-ab49-50a10eaa08cf" >
+				<s4hana:create-entity doc:name="Create SalesPrice Discount validation entity" doc:id="49dbb8d9-de20-4e9b-9fa7-3009b1a420bb" config-ref="SAP_S_4HANA_Config" service='#[Mule::p("sap.hana.Discountvalidation.service")]' entityType='#[Mule::p("sap.hana.Discountvalidation.entityType")]'>
+					<s4hana:entity ><![CDATA[#[vars.discountValidationReq]]]></s4hana:entity>
+				</s4hana:create-entity>
+				<ee:transform doc:name="Create response for HANA Sales Price call" doc:id="d5552f34-bd9c-4442-a2d5-03e1e3baf4e4">
+			<ee:message>
+						<ee:set-payload resource="dwl/createSalesPriceResponse.dwl" />
+			</ee:message>
+		</ee:transform>
+				<error-handler >
+					<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="cfc8f61f-db19-482f-8fb7-7226717e0b07" >
+						<s4hana:create-entity doc:name="Create SalesPrice to Unit price entity" doc:id="3e33fecd-7878-4cea-b17c-9f0fa3015875" config-ref="SAP_S_4HANA_Config" service="API_SALES_ORDER_SIMULATION_SRV" entityType="A_SalesOrderSimulation" responseTimeoutUnit="HOURS">
+					<s4hana:entity><![CDATA[#[vars.unitPriceReq]]]></s4hana:entity>
+				</s4hana:create-entity>
+						<ee:transform doc:name="Create error response for HANA Sales Price call" doc:id="f5f90e77-3dd9-469c-9bae-16fe0e5410e5" >
+							<ee:message >
+								<ee:set-payload resource="dwl/createSalesPriceErrorResponse.dwl" />
+							</ee:message>
+						</ee:transform>
+					</on-error-continue>
+				</error-handler>
+			</try>
+		</parallel-foreach>
+		<ee:transform doc:name="Consolidate responses" doc:id="f13326f9-789c-4870-b1c8-4c8f87b6cc52" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End of transaction" doc:id="34918817-a9db-4d33-9ac7-3b58cee51b90" message="End of transaction for transaction-id #[vars.transactionId]" category="${accelerator.logger}" />
+	</flow>
+</mule>
